@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Weather Dashboard</title>
+    <style>
+        :root {
+            /* Day Theme Colors */
+            --bg-day: linear-gradient(to top, #87CEEB, #ffffff); /* Sky Blue to White */
+            --card-bg-day: #ffffff;
+            --text-day: #333;
+            --accent-day: #1a73e8;
+            --subtle-text-day: #555;
+
+            /* Night Theme Colors */
+            --bg-night: linear-gradient(to top, #0f2b4c, #000022); /* Dark Navy to Black */
+            --card-bg-night: #1a1a2e;
+            --text-night: #f0f0f0;
+            --accent-night: #87CEEB; /* Light Blue */
+            --subtle-text-night: #c0c0c0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background 0.5s ease, color 0.5s ease;
+            overflow: hidden; /* Hide stars that fly off-screen */
+        }
+
+        /* --- THEME STYLES --- */
+        body.day {
+            background: var(--bg-day);
+            color: var(--text-day);
+        }
+
+        body.night {
+            background: var(--bg-night);
+            color: var(--text-night);
+        }
+
+        .card {
+            background: var(--card-bg-day);
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            text-align: center;
+            width: 90%;
+            max-width: 350px;
+            transition: background 0.5s ease, box-shadow 0.5s ease;
+            z-index: 10; /* Keep card above stars */
+        }
+
+        body.night .card {
+            background: var(--card-bg-night);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        #city {
+            font-size: 2em;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        /* New Weather Icon */
+        #weather-icon {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto;
+            /* Filter to make night icons brighter */
+            body.night & {
+                filter: brightness(1.2);
+            }
+        }
+        
+        #desc {
+            font-size: 1.2em;
+            text-transform: capitalize;
+            color: var(--subtle-text-day);
+            margin-top: -10px; /* Pull up under icon */
+            margin-bottom: 15px;
+        }
+
+        body.night #desc {
+            color: var(--subtle-text-night);
+        }
+
+        #temp {
+            font-size: 4.5em;
+            font-weight: 700;
+            margin: 10px 0;
+            color: var(--accent-day);
+            line-height: 1;
+            transition: color 0.5s ease;
+        }
+        
+        body.night #temp {
+            color: var(--accent-night);
+        }
+
+        .extra-info {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        body.night .extra-info {
+            border-top-color: #3a3a5a;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--subtle-text-day);
+        }
+
+        body.night .info-item {
+             color: var(--subtle-text-night);
+        }
+
+        .info-item svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--accent-day);
+            margin-bottom: 8px;
+            transition: stroke 0.5s ease;
+        }
+        
+        body.night .info-item svg {
+            stroke: var(--accent-night);
+        }
+
+        .info-item .data {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--text-day);
+            transition: color 0.5s ease;
+        }
+
+        body.night .info-item .data {
+            color: var(--text-night);
+        }
+
+        .info-item .label {
+            font-size: 0.9em;
+            margin-top: 2px;
+        }
+
+        #updated {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 25px;
+        }
+
+        body.night #updated {
+             color: #777;
+        }
+
+        /* --- COOL STUFF: Animated Star Field --- */
+        #stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            display: none; /* Hidden by default */
+        }
+        
+        body.night #stars-container {
+            display: block; /* Only show at night */
+        }
+
+        /* Creates a 1x1 white pixel */
+        .star {
+            width: 1px;
+            height: 1px;
+            background: #fff;
+            position: absolute;
+            box-shadow: 0 0 4px 1px #fff;
+            border-radius: 50%;
+            animation: twinkle 15s infinite linear;
+        }
+
+        /* We create 3 layers of stars for a parallax effect */
+        #stars1 {
+            width: 100%;
+            height: 100%;
+            animation: move-stars 50s linear infinite;
+        }
+        #stars2 {
+            width: 100%;
+            height: 100%;
+            animation: move-stars 100s linear infinite;
+        }
+        #stars3 {
+            width: 100%;
+            height: 100%;
+            animation: move-stars 150s linear infinite;
+        }
+
+        /* Animates the stars moving across the screen */
+        @keyframes move-stars {
+            from {transform: translateY(0px);}
+            to {transform: translateY(-100vh);} /* Move stars up */
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+    </style>
+</head>
+<body class="day"> <!-- Default to day theme -->
+
+    <!-- This div holds the animated stars. It's hidden by default. -->
+    <div id="stars-container">
+        <div id="stars1"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
+    </div>
+
+    <div class="card">
+        <h1 id="city">Loading...</h1>
+        <!-- New Dynamic Weather Icon -->
+        <img id="weather-icon" src="https://placehold.co/100x100/f0f2f5/f0f2f5?text=..." alt="Weather condition" title="">
+        
+        <p id="desc">...</p>
+        <p id="temp">--°C</p>
+
+        <div class="extra-info">
+            <div class="info-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path>
+                </svg>
+                <div class="data">
+                    <span id="humidity">--</span>%
+                </div>
+                <div class="label">Humidity</div>
+            </div>
+            
+            <div class="info-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 11 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
+                </svg>
+                <div class="data">
+                    <span id="wind">--</span> m/s
+                </div>
+                <div class="label">Wind</div>
+            </div>
+        </div>
+        
+        <p id="updated">Fetching latest data...</p>
+    </div>
+
+    <script>
+        // Function to create random stars
+        function createStars() {
+            const starLayers = ['stars1', 'stars2', 'stars3'];
+            starLayers.forEach(layer => {
+                const starLayer = document.getElementById(layer);
+                if (!starLayer) return;
+                
+                let starHtml = '';
+                const numStars = layer === 'stars1' ? 150 : (layer === 'stars2' ? 100 : 50);
+                
+                for (let i = 0; i < numStars; i++) {
+                    const x = Math.random() * 100; // percent
+                    const y = Math.random() * 200; // percent (200vh to fill next screen)
+                    const duration = Math.random() * 5 + 5; // 5-10s twinkle
+                    const size = layer === 'stars1' ? 1 : (layer === 'stars2' ? 2 : 3);
+                    
+                    starHtml += `<div class="star" style="
+                        top: ${y}vh; 
+                        left: ${x}vw; 
+                        width: ${size}px;
+                        height: ${size}px;
+                        animation-delay: ${Math.random() * -15}s;
+                        animation-duration: ${duration}s;
+                    "></div>`;
+                }
+                starLayer.innerHTML = starHtml;
+            });
+        }
+        
+        async function getWeatherData() {
+            try {
+                const cacheBuster = new Date().getTime();
+                const response = await fetch('weather.json?' + cacheBuster);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log(data);
+
+                // --- 1. Get ALL data, including new fields ---
+                const city = data.name;
+                const temp = data.main.temp;
+                const description = data.weather[0].description;
+                const humidity = data.main.humidity;
+                const windSpeed = data.wind.speed;
+                const timestamp = new Date(data.dt * 1000);
+                
+                // --- NEW: Get Day/Night and Icon data ---
+                const dt = data.dt;
+                const sunrise = data.sys.sunrise;
+                const sunset = data.sys.sunset;
+                const iconCode = data.weather[0].icon;
+                const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+
+                // --- 2. Put ALL data on the page ---
+                document.getElementById('city').innerText = city;
+                document.getElementById('desc').innerText = description;
+                document.getElementById('temp').innerText = `${temp.toFixed(1)}°C`;
+                document.getElementById('humidity').innerText = humidity;
+                document.getElementById('wind').innerText = windSpeed.toFixed(1);
+                document.getElementById('updated').innerText = `Last updated: ${timestamp.toLocaleTimeString()}`;
+                
+                // Set the new dynamic icon
+                const weatherIcon = document.getElementById('weather-icon');
+                weatherIcon.src = iconUrl;
+                weatherIcon.alt = description;
+                weatherIcon.title = description;
+
+                // --- 3. Set Day/Night Theme ---
+                if (dt > sunrise && dt < sunset) {
+                    // It's Day
+                    document.body.classList.add('day');
+                    document.body.classList.remove('night');
+                } else {
+                    // It's Night
+                    document.body.classList.add('night');
+                    document.body.classList.remove('day');
+                }
+
+            } catch (error) {
+                console.error("Error fetching weather data:", error);
+                document.getElementById('city').innerText = "Error";
+                document.getElementById('desc').innerText = "Could not load data.";
+            }
+        }
+
+        // Run the function when the page loads
+        getWeatherData();
+        createStars(); // Create the stars
+        
+        // Refresh the data on the page every 5 minutes (300000 ms)
+        setInterval(getWeatherData, 300000);
+    </script>
+</body>
+</html>
