@@ -1,84 +1,114 @@
 # AWS-Serverless-Weather-Dashboard
 A dynamic, serverless weather dashboard powered by AWS Lambda, API Gateway, S3, and OpenWeatherMap.
 
-The dashboard features:
+# AWS Serverless Weather Dashboard
 
-Live temperature, humidity, and wind speed.
+[![Serverless](https://img.shields.io/badge/serverless-AWS-f90.svg)](https://aws.amazon.com/serverless/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A dynamic weather icon that matches the current conditions.
+A dynamic, serverless weather dashboard built from scratch using AWS Lambda, API Gateway, and S3. This project fetches and displays the current weather, a 5-day forecast, and detailed metrics for any city in the world.
 
-An automatic day/night theme with a light sky or animated night-sky background.
 
-Core Architecture
+*(**Pro-tip:** Take a screenshot of your working app and upload it to your repo. Then, edit this line and replace the text with the image link, like `![App Screenshot](screenshot.png)`)*
 
-The project works on a simple, event-driven data pipeline:
+---
 
-Amazon EventBridge (Scheduler): A rule is set to trigger every 15 minutes.
+## ✨ Features
 
-AWS Lambda (The Worker): The EventBridge rule invokes a Python Lambda function. This function:
+* **Dynamic City Search:** Instantly fetch weather data for any city.
+* **Current Weather:** Displays the current temperature, description, and "feels like" temp.
+* **5-Day Forecast:** Shows a 5-day outlook with calculated max/min temperatures and conditions.
+* **Detailed Weather Grid:** A professional grid layout showing:
+    * Feels Like
+    * Wind Speed & Direction
+    * Humidity
+    * Visibility
+    * Air Pressure
+    * Cloudiness
+* **Dynamic Day/Night Theme:** The UI automatically switches between a "day" and "night" theme based on the city's local sunrise/sunset times.
+* **Fully Serverless:** No servers to manage. The entire application runs on the AWS free tier.
 
-Calls the OpenWeatherMap API to get current weather data.
+## 🏛️ Architecture
 
-Saves the data as a weather.json file in an S3 bucket.
+This project uses a classic serverless "pull" architecture. The frontend is decoupled from the backend, and the backend only runs when it's needed (i.e., when a user searches).
 
-Amazon S3 (Storage & Website): The S3 bucket is configured for static website hosting.
+`[User's Browser (S3)]` -> `[API Gateway Endpoint]` -> `[AWS Lambda Function]` -> `[OpenWeatherMap API]`
 
-It stores the weather.json data file.
 
-It hosts the index.html (this dashboard), which fetches the weather.json file to display the data.
 
-AWS Services Used
+* **Frontend (Amazon S3):** A single, static `index.html` file (with all CSS/JS) is hosted in an S3 bucket configured for static website hosting.
+* **API (Amazon API Gateway):** An HTTP API Gateway provides a single, public-facing REST endpoint (`GET /weather`).
+* **Backend (AWS Lambda):** The API Gateway triggers a Python Lambda function (`lambda_function.py`). This function:
+    1.  Parses the `city` from the request.
+    2.  Calls the OpenWeatherMap `/forecast` API.
+    3.  Processes the 40-entry list into a clean 5-day forecast, calculating daily min/max temps.
+    4.  Calculates the wind direction (e.g., "NNW").
+    5.  Returns a clean, simple JSON response to the frontend.
+* **Data Source:** [OpenWeatherMap 5 Day / 3 Hour Forecast API](https://openweathermap.org/forecast5).
 
-AWS Lambda: For running the Python code to fetch data.
+---
 
-Amazon S3: For storing the data file (weather.json) and hosting the index.html website.
+## 🚀 Setup & Deployment
 
-Amazon EventBridge: For scheduling the Lambda function to run automatically.
+To deploy this project yourself, you will need an AWS account and a free OpenWeatherMap API key.
 
-AWS IAM: For creating a role to give Lambda permission to write to S3.
+### 1. Backend (Lambda & API)
 
-How to Set This Up
+1.  **Create Lambda Function:**
+    * Go to the AWS Lambda console and create a new function (e.g., `weather-search-function`) using the `Python 3.12` (or newer) runtime.
+    * Copy the code from `backend/lambda_function.py` into the Lambda code editor.
+    * Go to **Configuration > Environment variables** and add your OpenWeatherMap key:
+        * **Key:** `API_KEY`
+        * **Value:** `your-openweathermap-api-key-here`
+    * Click **Deploy**.
 
-S3 Bucket:
+2.  **Create API Gateway:**
+    * Go to the API Gateway console and create a new **HTTP API**.
+    * Create a new route: `GET /weather`.
+    * Attach an integration to this route that points to your `weather-search-function` Lambda.
+    * Note the **Invoke URL** once it's created (e.g., `https://abcdef.execute-api.us-region-1.amazonaws.com`).
 
-Create a new S3 bucket.
+### 2. Frontend (S3)
 
-Disable "Block all public access" in the Permissions tab.
+1.  **Create S3 Bucket:**
+    * Go to the S3 console and create a new public bucket (e.g., `my-weather-dashboard-123`).
+    * **Uncheck** "Block all public access" and acknowledge the warning.
+    * Go to the **Properties** tab, scroll to the bottom, and enable **Static website hosting**. Set the index document to `index.html`.
+    * Go to the **Permissions** tab and add this **Bucket Policy** (replace `YOUR-BUCKET-NAME-HERE` with your bucket's name):
+        ```json
+        {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Sid": "PublicReadGetObject",
+                    "Effect": "Allow",
+                    "Principal": "*",
+                    "Action": "s3:GetObject",
+                    "Resource": "arn:aws:s3:::YOUR-BUCKET-NAME-HERE/*"
+                }
+            ]
+        }
+        ```
 
-Enable "Static website hosting" in the Properties tab and set the index document to index.html.
+2.  **Configure & Upload:**
+    * Open the `frontend/index.html` file in a text editor.
+    * Find the `const API_URL = ...` line in the `<script>` tag.
+    * Replace the placeholder URL with your **API Gateway Invoke URL** from step 1, making sure to add `/weather` to the end.
+        ```javascript
+        // Before:
+        // const API_URL = '[https://abcdef.execute-api.us-region-1.amazonaws.com/weather](https://abcdef.execute-api.us-region-1.amazonaws.com/weather)';
 
-Copy the Bucket website endpoint URL.
+        // After (example):
+        const API_URL = '[https://fj8fyttluf.execute-api.ap-south-1.amazonaws.com/weather](https://fj8fyttluf.execute-api.ap-south-1.amazonaws.com/weather)';
+        ```
+    * Save the file and **upload** the modified `index.html` to your S3 bucket.
 
-Lambda Function:
+### 3. Launch!
 
-Create a new Lambda function (e.g., getWeatherFunction with Python 3.11).
+* Go back to your S3 bucket's **Properties** tab, find the **Static website hosting** URL, and click it. Your app is live.
 
-Increase the Timeout to 15 seconds.
+---
 
-In Permissions, find the function's Role and attach the AmazonS3FullAccess policy.
+## 📄 License
 
-Copy the code from lambda_function.py into the editor.
-
-CRITICAL: Fill in your API_KEY and BUCKET_NAME at the top of the lambda_function.py file.
-
-Deploy and Test the function. You should see weather.json appear in your S3 bucket.
-
-EventBridge Rule:
-
-Create a new EventBridge Rule.
-
-Set the Rule type to Schedule.
-
-Set the schedule (e.g., "A schedule that runs at a regular rate" of 15 minutes).
-
-Set the Target to your getWeatherFunction Lambda function.
-
-Dashboard Frontend:
-
-Copy the code from index.html.
-
-Upload this file to your S3 bucket.
-
-In the S3 bucket, select both index.html and weather.json, click Actions > Make public using ACL.
-
-Paste your Bucket website endpoint URL from Step 1 into your browser. Your dashboard is live!
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
