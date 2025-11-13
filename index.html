@@ -6,221 +6,113 @@
     <title>My Weather Dashboard</title>
     <style>
         :root {
-            /* Day Theme Colors */
-            --bg-day: linear-gradient(to top, #87CEEB, #ffffff); /* Sky Blue to White */
+            --bg-day: linear-gradient(to top, #87CEEB, #ffffff);
             --card-bg-day: #ffffff;
             --text-day: #333;
             --accent-day: #1a73e8;
-            --subtle-text-day: #555;
-
-            /* Night Theme Colors */
-            --bg-night: linear-gradient(to top, #0f2b4c, #000022); /* Dark Navy to Black */
+            --input-bg-day: #f0f2f5;
+            --input-border-day: #ddd;
+            --bg-night: linear-gradient(to top, #0f2b4c, #000022);
             --card-bg-night: #1a1a2e;
             --text-night: #f0f0f0;
-            --accent-night: #87CEEB; /* Light Blue */
+            --accent-night: #87CEEB;
+            --input-bg-night: #2c2c44;
+            --input-border-night: #3a3a5a;
+            --subtle-text-day: #555;
             --subtle-text-night: #c0c0c0;
         }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: grid;
-            place-items: center;
-            min-height: 100vh;
-            margin: 0;
-            transition: background 0.5s ease, color 0.5s ease;
-            overflow: hidden; /* Hide stars that fly off-screen */
-        }
-
-        /* --- THEME STYLES --- */
-        body.day {
-            background: var(--bg-day);
-            color: var(--text-day);
-        }
-
-        body.night {
-            background: var(--bg-night);
-            color: var(--text-night);
-        }
-
-        .card {
-            background: var(--card-bg-day);
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            padding: 30px;
-            text-align: center;
-            width: 90%;
-            max-width: 350px;
-            transition: background 0.5s ease, box-shadow 0.5s ease;
-            z-index: 10; /* Keep card above stars */
-        }
-
-        body.night .card {
-            background: var(--card-bg-night);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-        }
-
-        #city {
-            font-size: 2em;
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; display: flex;
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; transition: background 0.5s ease, color 0.5s ease; overflow-y: auto; }
+        body.day { background: var(--bg-day); color: var(--text-day); }
+        body.night { background: var(--bg-night); color: var(--text-night); }
+        .card { background: var(--card-bg-day); border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); padding: 30px; text-align: center; width: 100%; max-width: 380px; transition: background 0.5s ease, box-shadow 0.5s ease; z-index: 10; margin-bottom: 20px; }
+        body.night .card { background: var(--card-bg-night); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); }
+        .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        #locationInput { flex-grow: 1; padding: 12px; font-size: 1em; border: 1px solid var(--input-border-day); border-radius: 8px; background: var(--input-bg-day); color: var(--text-day); transition: all 0.5s ease; }
+        #submitButton { padding: 12px 15px; font-size: 1em; font-weight: 600; border: none; border-radius: 8px; background: var(--accent-day); color: white; cursor: pointer; transition: all 0.5s ease; }
+        #city { font-size: 2em; font-weight: 600; margin-bottom: 5px; min-height: 1.2em; }
+        #weather-icon { width: 100px; height: 100px; margin: 0 auto; }
+        #desc { font-size: 1.2em; text-transform: capitalize; color: var(--subtle-text-day); margin-top: -10px; margin-bottom: 15px; min-height: 1.2em; }
+        body.night #desc { color: var(--subtle-text-night); }
+        #temp { font-size: 4.5em; font-weight: 700; margin: 10px 0; color: var(--accent-day); line-height: 1; transition: color 0.5s ease; }
+        body.night #temp { color: var(--accent-night); }
+        
+        /* --- NEW: Weather Details Grid CSS --- */
+        .details-heading {
+            font-size: 1.1em;
             font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        /* New Weather Icon */
-        #weather-icon {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto;
-            /* Filter to make night icons brighter */
-            body.night & {
-                filter: brightness(1.2);
-            }
-        }
-        
-        #desc {
-            font-size: 1.2em;
-            text-transform: capitalize;
-            color: var(--subtle-text-day);
-            margin-top: -10px; /* Pull up under icon */
-            margin-bottom: 15px;
-        }
-
-        body.night #desc {
-            color: var(--subtle-text-night);
-        }
-
-        #temp {
-            font-size: 4.5em;
-            font-weight: 700;
-            margin: 10px 0;
-            color: var(--accent-day);
-            line-height: 1;
-            transition: color 0.5s ease;
-        }
-        
-        body.night #temp {
-            color: var(--accent-night);
-        }
-
-        .extra-info {
-            display: flex;
-            justify-content: space-around;
+            text-align: left;
             margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #f0f0f0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
         }
-
-        body.night .extra-info {
-            border-top-color: #3a3a5a;
+        body.night .details-heading {
+            border-bottom-color: #3a3a5a;
         }
-
-        .info-item {
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 2 columns */
+            gap: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .detail-item {
             display: flex;
-            flex-direction: column;
             align-items: center;
-            color: var(--subtle-text-day);
+            gap: 12px;
         }
-
-        body.night .info-item {
-             color: var(--subtle-text-night);
-        }
-
-        .info-item svg {
+        .detail-item svg {
             width: 24px;
             height: 24px;
             stroke: var(--accent-day);
-            margin-bottom: 8px;
-            transition: stroke 0.5s ease;
+            flex-shrink: 0;
         }
-        
-        body.night .info-item svg {
+        body.night .detail-item svg {
             stroke: var(--accent-night);
         }
-
-        .info-item .data {
-            font-size: 1.5em;
-            font-weight: 600;
-            color: var(--text-day);
-            transition: color 0.5s ease;
-        }
-
-        body.night .info-item .data {
-            color: var(--text-night);
-        }
-
-        .info-item .label {
+        .detail-item .label {
             font-size: 0.9em;
-            margin-top: 2px;
+            color: var(--subtle-text-day);
         }
+        body.night .detail-item .label {
+            color: var(--subtle-text-night);
+        }
+        .detail-item .value {
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        /* --- END NEW CSS --- */
 
-        #updated {
-            font-size: 0.8em;
-            color: #999;
-            margin-top: 25px;
-        }
+        #updated { font-size: 0.8em; color: #999; margin-top: 25px; min-height: 1.2em; }
+        body.night #updated { color: #777; }
+        #stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; display: none; }
+        body.night #stars-container { display: block; }
+        .star { width: 1px; height: 1px; background: #fff; position: absolute; box-shadow: 0 0 4px 1px #fff; border-radius: 50%; animation: twinkle 15s infinite linear; }
+        #stars1, #stars2, #stars3 { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+        #stars1 { animation: move-stars 50s linear infinite; }
+        #stars2 { animation: move-stars 100s linear infinite; }
+        #stars3 { animation: move-stars 150s linear infinite; }
+        @keyframes move-stars { from {transform: translateY(0px);} to {transform: translateY(-100vh);} }
+        @keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
 
-        body.night #updated {
-             color: #777;
-        }
-
-        /* --- COOL STUFF: Animated Star Field --- */
-        #stars-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            display: none; /* Hidden by default */
-        }
+        /* --- 5-day forecast CSS (no change) --- */
+        .forecast-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; max-width: 800px; z-index: 10; }
+        .forecast-card { background: var(--card-bg-day); border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); padding: 15px; width: 130px; text-align: center; transition: all 0.5s ease; }
+        body.night .forecast-card { background: var(--card-bg-night); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .forecast-card .day { font-size: 1.1em; font-weight: 600; color: var(--accent-day); margin-bottom: 5px; }
+        body.night .forecast-card .day { color: var(--accent-night); }
+        .forecast-card .temp { font-size: 1.2em; font-weight: 700; margin: 5px 0; }
+        .forecast-card .desc { font-size: 0.9em; text-transform: capitalize; color: var(--subtle-text-day); }
+        body.night .forecast-card .desc { color: var(--subtle-text-night); }
+        .forecast-card img { width: 50px; height: 50px; }
         
-        body.night #stars-container {
-            display: block; /* Only show at night */
-        }
-
-        /* Creates a 1x1 white pixel */
-        .star {
-            width: 1px;
-            height: 1px;
-            background: #fff;
-            position: absolute;
-            box-shadow: 0 0 4px 1px #fff;
-            border-radius: 50%;
-            animation: twinkle 15s infinite linear;
-        }
-
-        /* We create 3 layers of stars for a parallax effect */
-        #stars1 {
-            width: 100%;
-            height: 100%;
-            animation: move-stars 50s linear infinite;
-        }
-        #stars2 {
-            width: 100%;
-            height: 100%;
-            animation: move-stars 100s linear infinite;
-        }
-        #stars3 {
-            width: 100%;
-            height: 100%;
-            animation: move-stars 150s linear infinite;
-        }
-
-        /* Animates the stars moving across the screen */
-        @keyframes move-stars {
-            from {transform: translateY(0px);}
-            to {transform: translateY(-100vh);} /* Move stars up */
-        }
-
-        @keyframes twinkle {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.2; }
-        }
-
     </style>
-</head>
-<body class="day"> <!-- Default to day theme -->
+    
+    </head>
+<body class="day">
 
-    <!-- This div holds the animated stars. It's hidden by default. -->
     <div id="stars-container">
         <div id="stars1"></div>
         <div id="stars2"></div>
@@ -228,133 +120,239 @@
     </div>
 
     <div class="card">
-        <h1 id="city">Loading...</h1>
-        <!-- New Dynamic Weather Icon -->
-        <img id="weather-icon" src="https://placehold.co/100x100/f0f2f5/f0f2f5?text=..." alt="Weather condition" title="">
+        <div class="search-container">
+            <input type="text" id="locationInput" placeholder="Enter city (e.g., London)">
+            <button id="submitButton">Go</button>
+        </div>
         
+        <h1 id="city">Enter a city</h1>
+        <img id="weather-icon" src="https://placehold.co/100x100/f0f2f5/f0f2f5?text=..." alt="Weather condition" title="">
         <p id="desc">...</p>
         <p id="temp">--°C</p>
 
-        <div class="extra-info">
-            <div class="info-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path>
-                </svg>
-                <div class="data">
-                    <span id="humidity">--</span>%
+        <div class="details-heading">Weather details</div>
+        <div class="details-grid">
+            <div class="detail-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>
+                <div>
+                    <div class="label">Feels like</div>
+                    <div class="value" id="feels-like">--°</div>
                 </div>
-                <div class="label">Humidity</div>
             </div>
-            
-            <div class="info-item">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 11 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"></path>
-                </svg>
-                <div class="data">
-                    <span id="wind">--</span> m/s
+            <div class="detail-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 11 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>
+                <div>
+                    <div class="label">Wind</div>
+                    <div class="value" id="wind-val">-- m/s</div>
                 </div>
-                <div class="label">Wind</div>
+            </div>
+            <div class="detail-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0L12 2.69z"></path></svg>
+                <div>
+                    <div class="label">Humidity</div>
+                    <div class="value" id="humidity-val">-- %</div>
+                </div>
+            </div>
+            <div class="detail-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                <div>
+                    <div class="label">Visibility</div>
+                    <div class="value" id="visibility-val">-- km</div>
+                </div>
+            </div>
+            <div class="detail-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12H3"/><path d="M21 3H3"/><path d="M21 21H3"/><path d="M12 3v18"/></svg>
+                <div>
+                    <div class="label">Air pressure</div>
+                    <div class="value" id="pressure-val">-- hPa</div>
+                </div>
+            </div>
+            <div class="detail-item">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+                <div>
+                    <div class="label">Cloudiness</div>
+                    <div class="value" id="cloud-val">-- %</div>
+                </div>
             </div>
         </div>
-        
-        <p id="updated">Fetching latest data...</p>
+        <p id="updated">Waiting for search...</p>
     </div>
 
+    <div class="forecast-container" id="forecast-container">
+        </div>
+    
     <script>
-        // Function to create random stars
+        // === YOUR API GATEWAY URL ===
+        const API_URL = 'https://fj8fyttluf.execute-api.ap-south-1.amazonaws.com/weather';
+        
+        const forecastContainer = document.getElementById('forecast-container');
+        
+        // --- Function to create stars (cosmetic, no change) ---
         function createStars() {
+            // (Aapka star code yahaan... poora copy paste kar lein)
             const starLayers = ['stars1', 'stars2', 'stars3'];
             starLayers.forEach(layer => {
                 const starLayer = document.getElementById(layer);
                 if (!starLayer) return;
-                
                 let starHtml = '';
                 const numStars = layer === 'stars1' ? 150 : (layer === 'stars2' ? 100 : 50);
-                
                 for (let i = 0; i < numStars; i++) {
-                    const x = Math.random() * 100; // percent
-                    const y = Math.random() * 200; // percent (200vh to fill next screen)
-                    const duration = Math.random() * 5 + 5; // 5-10s twinkle
+                    const x = Math.random() * 100;
+                    const y = Math.random() * 200;
+                    const duration = Math.random() * 5 + 5;
                     const size = layer === 'stars1' ? 1 : (layer === 'stars2' ? 2 : 3);
-                    
-                    starHtml += `<div class="star" style="
-                        top: ${y}vh; 
-                        left: ${x}vw; 
-                        width: ${size}px;
-                        height: ${size}px;
-                        animation-delay: ${Math.random() * -15}s;
-                        animation-duration: ${duration}s;
-                    "></div>`;
+                    starHtml += `<div class="star" style="top: ${y}vh; left: ${x}vw; width: ${size}px; height: ${size}px; animation-delay: ${Math.random() * -15}s; animation-duration: ${duration}s;"></div>`;
                 }
                 starLayer.innerHTML = starHtml;
             });
         }
         
-        async function getWeatherData() {
+        // --- UPDATED: Function to reset card and NEW grid ---
+        function setCardState(city, desc, updated) {
+            document.getElementById('city').innerText = city;
+            document.getElementById('desc').innerText = desc;
+            document.getElementById('temp').innerText = "--°C";
+            document.getElementById('updated').innerText = updated;
+            document.getElementById('weather-icon').src = "https://placehold.co/100x100/f0f2f5/f0f2f5?text=...";
+            
+            // Clear details grid
+            document.getElementById('feels-like').innerText = "--°";
+            document.getElementById('wind-val').innerText = "-- m/s";
+            document.getElementById('humidity-val').innerText = "-- %";
+            document.getElementById('visibility-val').innerText = "-- km";
+            document.getElementById('pressure-val').innerText = "-- hPa";
+            document.getElementById('cloud-val').innerText = "-- %";
+            
+            // Clear forecast
+            forecastContainer.innerHTML = ""; 
+        }
+        
+        
+        // --- HEAVILY UPDATED: Function to fill all data ---
+        function updatePage(data) {
+            console.log(data); 
+
+            // --- 1. Get CURRENT data ---
+            const city = data.city.name;
+            const country = data.city.country;
+            const sunrise = data.city.sunrise;
+            const sunset = data.city.sunset;
+            
+            const current = data.current; 
+            const temp = current.main.temp;
+            const feels_like = current.main.feels_like;
+            const pressure = current.main.pressure;
+            const humidity = current.main.humidity;
+            const visibility = current.visibility / 1000; // Meters ko KM mein badlo
+            const cloudiness = current.clouds.all; // NEW
+            const description = current.weather[0].description;
+            const iconCode = current.weather[0].icon;
+            const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+            const timestamp = new Date(current.dt * 1000); 
+            const windSpeed = current.wind.speed;
+            const windDir = current.wind_direction; // Ye humne Lambda mein banaya
+            
+            // --- 2. Put CURRENT data on the main card ---
+            document.getElementById('city').innerText = `${city}, ${country}`;
+            document.getElementById('desc').innerText = description;
+            document.getElementById('temp').innerText = `${temp.toFixed(1)}°C`;
+            document.getElementById('updated').innerText = `Updated: ${timestamp.toLocaleTimeString()}`;
+            
+            const weatherIcon = document.getElementById('weather-icon');
+            weatherIcon.src = iconUrl;
+            weatherIcon.alt = description;
+            weatherIcon.title = description;
+
+            // --- 3. Put data in the NEW details grid ---
+            document.getElementById('feels-like').innerText = `${feels_like.toFixed(1)}°`;
+            document.getElementById('wind-val').innerText = `${windDir} ${windSpeed.toFixed(1)} m/s`;
+            document.getElementById('humidity-val').innerText = `${humidity} %`;
+            document.getElementById('visibility-val').innerText = `${visibility.toFixed(1)} km`;
+            document.getElementById('pressure-val').innerText = `${pressure} hPa`;
+            document.getElementById('cloud-val').innerText = `${cloudiness} %`; // NEW
+
+            // --- 4. Set Day/Night Theme ---
+            const now = new Date().getTime() / 1000;
+            if (now > sunrise && now < sunset) {
+                document.body.classList.add('day');
+                document.body.classList.remove('night');
+            } else {
+                document.body.classList.add('night');
+                document.body.classList.remove('day');
+            }
+            
+            // --- 5. Build and inject the 5-day forecast (no change here) ---
+            let forecastHtml = ""; 
+            const forecasts = data.forecast;
+            const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+            
+            for (const item of forecasts) {
+                const dateString = item.dt_txt.split(' ')[0];
+                const dateObj = new Date(dateString + 'T00:00:00');
+                const dayName = dayNames[dateObj.getUTCDay()]; 
+                
+                const tempMax = item.temp_max.toFixed(0);
+                const tempMin = item.temp_min.toFixed(0);
+                const dayIcon = item.icon;
+                const dayDesc = item.description;
+                
+                forecastHtml += `
+                    <div class="forecast-card">
+                        <div class="day">${dayName}</div>
+                        <img src="https://openweathermap.org/img/wn/${dayIcon}.png" alt="${dayDesc}">
+                        <div class="temp">${tempMax}° / ${tempMin}°C</div>
+                        <div class="desc">${dayDesc}</div>
+                    </div>
+                `;
+            }
+            forecastContainer.innerHTML = forecastHtml;
+        }
+        
+        // --- Function to fetch weather (no change) ---
+        async function fetchWeather(city) {
+            setCardState(city, "Fetching...", "Contacting API...");
+            
+            const fetchUrl = `${API_URL}?city=${encodeURIComponent(city)}`;
+            
             try {
-                const cacheBuster = new Date().getTime();
-                const response = await fetch('weather.json?' + cacheBuster);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+                const response = await fetch(fetchUrl);
                 const data = await response.json();
-                console.log(data);
 
-                // --- 1. Get ALL data, including new fields ---
-                const city = data.name;
-                const temp = data.main.temp;
-                const description = data.weather[0].description;
-                const humidity = data.main.humidity;
-                const windSpeed = data.wind.speed;
-                const timestamp = new Date(data.dt * 1000);
-                
-                // --- NEW: Get Day/Night and Icon data ---
-                const dt = data.dt;
-                const sunrise = data.sys.sunrise;
-                const sunset = data.sys.sunset;
-                const iconCode = data.weather[0].icon;
-                const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-
-                // --- 2. Put ALL data on the page ---
-                document.getElementById('city').innerText = city;
-                document.getElementById('desc').innerText = description;
-                document.getElementById('temp').innerText = `${temp.toFixed(1)}°C`;
-                document.getElementById('humidity').innerText = humidity;
-                document.getElementById('wind').innerText = windSpeed.toFixed(1);
-                document.getElementById('updated').innerText = `Last updated: ${timestamp.toLocaleTimeString()}`;
-                
-                // Set the new dynamic icon
-                const weatherIcon = document.getElementById('weather-icon');
-                weatherIcon.src = iconUrl;
-                weatherIcon.alt = description;
-                weatherIcon.title = description;
-
-                // --- 3. Set Day/Night Theme ---
-                if (dt > sunrise && dt < sunset) {
-                    // It's Day
-                    document.body.classList.add('day');
-                    document.body.classList.remove('night');
+                if (!response.ok) {
+                    const errorMessage = data.message || `HTTP error: ${response.status}`;
+                    setCardState("Error", errorMessage.replace('city not found', 'City Not Found'), "Please try again");
                 } else {
-                    // It's Night
-                    document.body.classList.add('night');
-                    document.body.classList.remove('day');
+                    updatePage(data);
                 }
-
             } catch (error) {
-                console.error("Error fetching weather data:", error);
-                document.getElementById('city').innerText = "Error";
-                document.getElementById('desc').innerText = "Could not load data.";
+                console.error("Fetch Error:", error);
+                setCardState("Error", "Could not fetch data", "Check API URL or console");
             }
         }
 
-        // Run the function when the page loads
-        getWeatherData();
-        createStars(); // Create the stars
-        
-        // Refresh the data on the page every 5 minutes (300000 ms)
-        setInterval(getWeatherData, 300000);
+        // --- Set up the page when it loads (no change) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars(); // Add the pretty stars
+            
+            const submitButton = document.getElementById('submitButton');
+            const locationInput = document.getElementById('locationInput');
+            
+            submitButton.addEventListener('click', () => {
+                const city = locationInput.value;
+                if (city) {
+                    fetchWeather(city);
+                }
+            });
+            
+            locationInput.addEventListener('keyup', (event) => {
+                if (event.key === 'Enter') {
+                    const city = locationInput.value;
+                    if (city) {
+                        fetchWeather(city);
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
