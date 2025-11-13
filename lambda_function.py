@@ -3,7 +3,7 @@ import urllib3
 import boto3 # This is the AWS SDK, already included!
 
 # --- 1. SET YOUR DETAILS HERE ---
-API_KEY = 'fca52fff19eea7f4bb2de307850dd32a' # Paste your key from Step 1
+API_KEY = '' # Paste your key from Step 1
 CITY = 'New Delhi,India' # Or any city
 BUCKET_NAME = 'yourname-weather-dash-12345' # Your S3 bucket from Step 2
 # --- ------------------------ ---
@@ -40,5 +40,6 @@ def lambda_handler(event, context):
     except Exception as e:
         print(f"Error uploading to S3: {e}")
         return {'statusCode': 500, 'body': json.dumps(f"Error uploading to S3: {e}")}
+
 
     return {'statusCode': 200, 'body': json.dumps('Weather data updated!')}
