@@ -1,7 +1,7 @@
 # AWS-Serverless-Weather-Dashboard
 A dynamic, serverless weather dashboard powered by AWS Lambda, API Gateway, S3, and OpenWeatherMap.
 
-# AWS Serverless Weather Dashboard
+ 
 
 [![Serverless](https://img.shields.io/badge/serverless-AWS-f90.svg)](https://aws.amazon.com/serverless/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
