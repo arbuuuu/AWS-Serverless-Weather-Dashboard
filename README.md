@@ -9,9 +9,7 @@ A dynamic, serverless weather dashboard powered by AWS Lambda, API Gateway, S3, 
 A dynamic, serverless weather dashboard built from scratch using AWS Lambda, API Gateway, and S3. This project fetches and displays the current weather, a 5-day forecast, and detailed metrics for any city in the world.
 
 
-*(**Pro-tip:** Take a screenshot of your working app and upload it to your repo. Then, edit this line and replace the text with the image link, like `![App Screenshot](screenshot.png)`)*
-
----
+ 
 
 ## ✨ Features
 
